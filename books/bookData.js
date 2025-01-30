@@ -12,7 +12,7 @@ const postBook = (request, h) => {
         status: "fail",
         message: "Gagal menambahkan buku, mohon isi nama buku",
       })
-      .code(400);
+      .code(404);
   }
   if (readPage > pageCount) {
     return h
@@ -21,7 +21,7 @@ const postBook = (request, h) => {
         message:
           "Gagal menambahkan buku, readPage tidak boleh lebih besar dari pageCount",
       })
-      .code(400);
+      .code(404);
   }
 
   const id = nanoid();
@@ -51,9 +51,9 @@ const postBook = (request, h) => {
     .response({
       status: "success",
       message: "Buku berhasil ditambahkan",
-      data: newBook,
+      data: { bookId: id },
     })
-    .code(201);
+    .code(200);
 };
 
 const getAllBook = (request, h) => {
@@ -82,12 +82,10 @@ const getAllBook = (request, h) => {
   const response = {
     status: "success",
     data: {
-      books: books.map(({ id, name, publisher, reading, finished }) => ({
+      books: books.map(({ id, name, publisher }) => ({
         id,
         name,
         publisher,
-        reading,
-        finished,
       })),
     },
   };
@@ -95,8 +93,8 @@ const getAllBook = (request, h) => {
 };
 
 const getBookById = (request, h) => {
-  const { id } = request.params;
-  const book = books.find((b) => b.id === id);
+  const { bookId } = request.params;
+  const book = books.find((b) => b.id === bookId);
 
   if (!book) {
     return h
@@ -104,7 +102,7 @@ const getBookById = (request, h) => {
         status: "fail",
         message: "Buku tidak ditemukan",
       })
-      .code(400);
+      .code(404);
   }
 
   return h
@@ -116,7 +114,7 @@ const getBookById = (request, h) => {
 };
 
 const updateBook = (request, h) => {
-  const { id } = request.params;
+  const { bookId } = request.params;
   const {
     name,
     year,
@@ -134,24 +132,24 @@ const updateBook = (request, h) => {
         status: "fail",
         message: "Gagal mengubah buku, mohon isi nama buku",
       })
-      .code(400);
+      .code(404);
   }
   if (readPage > pageCount) {
     return h.response({
       status: "fail",
       message:
         "Gagal mengubah buku, readPage tidak boleh lebih besar dari pageCount",
-    });
+    }).code(404)
   }
 
-  const index = books.findIndex((book) => book.id === id);
+  const index = books.findIndex((book) => book.id === bookId);
   if (index === -1) {
     return h
       .response({
         status: "fail",
         message: "Buku tidak ditemukan",
       })
-      .code(400);
+      .code(404);
   }
 
   const updateAt = new Date().toISOString();
@@ -179,8 +177,8 @@ const updateBook = (request, h) => {
 };
 
 const deleteBook = (request, h) => {
-  const { id } = request.params;
-  const index = books.findIndex((book) => book.id === id);
+  const { bookId } = request.params;
+  const index = books.findIndex((book) => book.id === bookId);
 
   if (index === -1) {
     return h
@@ -188,7 +186,7 @@ const deleteBook = (request, h) => {
         status: "fail",
         message: "Buku tidak ditemukan",
       })
-      .code(400);
+      .code(404);
   }
 
   books.splice(index, 1);
@@ -198,7 +196,7 @@ const deleteBook = (request, h) => {
       status: "success",
       message: "Buku berhasil dihapus",
     })
-    .code(204);
+    .code(200);
 };
 
 module.exports = {
